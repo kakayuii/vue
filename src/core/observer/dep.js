@@ -10,10 +10,13 @@ let uid = 0
  * A dep is an observable that can have multiple
  * directives subscribing to it.
  */
+//Dep 是整个 getter 依赖收集的核心
+//Dep 是一个 Class，它定义了一些属性和方法
+//Dep 实际上就是对 Watcher 的一种管理，Dep 脱离 Watcher 单独存在是没有意义的
 export default class Dep {
-  static target: ?Watcher;
+  static target: ?Watcher;//它有一个静态属性 target，这是一个全局唯一 Watcher，这是一个非常巧妙的设计，因为在同一时间只能有一个全局的 Watcher 被计算
   id: number;
-  subs: Array<Watcher>;
+  subs: Array<Watcher>;//它的自身属性 subs 也是 Watcher 的数组。
 
   constructor () {
     this.id = uid++
