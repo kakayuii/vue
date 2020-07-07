@@ -189,8 +189,8 @@ export default class Watcher {
    */
   run () {
     if (this.active) {
-      const value = this.get()
-      if (
+      const value = this.get()//通过 this.get() 得到它当前的值 //执行 this.get() 方法求值的时候，会执行 getter 方法
+      if (//如果满足新旧值不等、新值是对象类型、deep 模式任何一个条件，则执行 watcher 的回调
         value !== this.value ||
         // Deep watchers and watchers on Object/Arrays should fire even
         // when the value is the same, because the value may
@@ -203,7 +203,7 @@ export default class Watcher {
         this.value = value
         if (this.user) {
           try {
-            this.cb.call(this.vm, value, oldValue)
+            this.cb.call(this.vm, value, oldValue)//注意回调函数执行的时候会把第一个和第二个参数传入新值 value 和旧值 oldValue，这就是当我们添加自定义 watcher 的时候能在回调函数的参数中拿到新旧值的原因。
           } catch (e) {
             handleError(e, this.vm, `callback for watcher "${this.expression}"`)
           }
