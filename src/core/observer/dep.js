@@ -60,7 +60,7 @@ const targetStack = []
 
 export function pushTarget (target: ?Watcher) {
   targetStack.push(target)
-  Dep.target = target
+  Dep.target = target//把 Dep.target 赋值为当前的渲染 watcher 并压栈（为了恢复用）
 }
 
 export function popTarget () {
