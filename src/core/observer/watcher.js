@@ -171,7 +171,9 @@ export default class Watcher {
    * Subscriber interface.
    * Will be called when a dependency changes.
    */
-  //这里对于 Watcher 的不同状态，会执行不同的逻辑，computed 和 sync ，
+  //这里对于 Watcher 的不同状态，会执行不同的逻辑，computed 和 sync 
+  //一旦我们对计算属性依赖的数据做修改，则会触发 setter 过程，通知所有订阅它变化的 watcher 更新
+//对于计算属性这样的 computed watcher，它实际上是有 2 种模式，lazy 和 active。
   update () {
     /* istanbul ignore else */
     if (this.lazy) {
@@ -218,6 +220,7 @@ export default class Watcher {
    * Evaluate the value of the watcher.
    * This only gets called for lazy watchers.
    */
+//通过 this.get() 求值，然后把 this.dirty 设置为 false。在求值过程中，会执行 value = this.getter.call(vm, vm)，这实际上就是执行了计算属性定义的 getter 函数，在我们这个例子就是执行了 return this.firstName + ' ' + this.lastName。
   evaluate () {
     this.value = this.get()
     this.dirty = false
@@ -226,6 +229,7 @@ export default class Watcher {
   /**
    * Depend on all deps collected by this watcher.
    */
+//这时候的 Dep.target 是渲染 watcher，所以 this.dep.depend() 相当于渲染 watcher 订阅了这个 computed watcher 的变化。
   depend () {
     let i = this.deps.length
     while (i--) {
