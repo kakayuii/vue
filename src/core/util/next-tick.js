@@ -10,6 +10,7 @@ export let isUsingMicroTask = false
 const callbacks = []
 let pending = false
 
+//对 callbacks 遍历，然后执行相应的回调函数。
 function flushCallbacks () {
   pending = false
   const copies = callbacks.slice(0)
@@ -86,7 +87,7 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
 
 export function nextTick (cb?: Function, ctx?: Object) {
   let _resolve
-  callbacks.push(() => {
+  callbacks.push(() => {//保证在同一个 tick 内多次执行 nextTick，不会开启多个异步任务，而把这些异步任务都压成一个同步任务，在下一个 tick 执行完毕。
     if (cb) {
       try {
         cb.call(ctx)
@@ -102,7 +103,7 @@ export function nextTick (cb?: Function, ctx?: Object) {
     timerFunc()
   }
   // $flow-disable-line
-  if (!cb && typeof Promise !== 'undefined') {
+  if (!cb && typeof Promise !== 'undefined') {//当 nextTick 不传 cb 参数的时候，提供一个 Promise 化的调用，比如：nextTick().then(() => {})
     return new Promise(resolve => {
       _resolve = resolve
     })
