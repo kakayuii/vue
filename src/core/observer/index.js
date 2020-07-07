@@ -34,7 +34,7 @@ export function toggleObserving (value: boolean) {
  * object's property keys into getter/setters that
  * collect dependencies and dispatch updates.
  */
-//observe 方法的作用就是给非 VNode 的对象类型数据添加一个 Observer，如果已经添加过则直接返回，否则在满足一定条件下去实例化一个 Observer 对象实例
+
 export class Observer {
   value: any;
   dep: Dep;
@@ -46,8 +46,8 @@ export class Observer {
     this.vmCount = 0
     def(value, '__ob__', this)//通过执行 def 函数把自身实例添加到数据对象 value 的 __ob__ 属性上
     if (Array.isArray(value)) {//对 value 做判断，对于数组会调用 observeArray 方法，否则对纯对象调用 walk 方法
-      if (hasProto) {
-        protoAugment(value, arrayMethods)
+      if (hasProto) {////首先获取 augment，这里的 hasProto 实际上就是判断对象中是否存在 __proto__，如果存在则 augment 指向 protoAugment， 否则指向 copyAugment
+        protoAugment(value, arrayMethods)//对于大部分现代浏览器都会走到 protoAugment，那么它实际上就把 value 的原型指向了 arrayMethods
       } else {
         copyAugment(value, arrayMethods, arrayKeys)
       }
@@ -89,7 +89,7 @@ export class Observer {
  */
 function protoAugment (target, src: Object) {
   /* eslint-disable no-proto */
-  target.__proto__ = src
+  target.__proto__ = src//直接把 target.__proto__ 原型直接修改为 src
   /* eslint-enable no-proto */
 }
 
@@ -99,9 +99,9 @@ function protoAugment (target, src: Object) {
  */
 /* istanbul ignore next */
 function copyAugment (target: Object, src: Object, keys: Array<string>) {
-  for (let i = 0, l = keys.length; i < l; i++) {
+  for (let i = 0, l = keys.length; i < l; i++) {//遍历 keys
     const key = keys[i]
-    def(target, key, src[key])
+    def(target, key, src[key])//通过 def，也就是 Object.defineProperty 去定义它自身的属性值。
   }
 }
 
@@ -110,6 +110,7 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
  * returns the new observer if successfully observed,
  * or the existing observer if the value already has one.
  */
+//observe 方法的作用就是给非 VNode 的对象类型数据添加一个 Observer，如果已经添加过则直接返回，否则在满足一定条件下去实例化一个 Observer 对象实例
 export function observe (value: any, asRootData: ?boolean): Observer | void {
   if (!isObject(value) || value instanceof VNode) {
     return
@@ -165,9 +166,9 @@ export function defineReactive (
       const value = getter ? getter.call(obj) : val
       if (Dep.target) {
         dep.depend()//在 get 函数中通过 dep.depend 做依赖收集
-        if (childOb) {
+        if (childOb) {//在 getter 过程中判断了 childOb，并调用了 childOb.dep.depend() 收集了依赖，这就是为什么执行 Vue.set 的时候通过 ob.dep.notify() 能够通知到 watcher ，从而让添加新的属性到对象也可以检测到变化。
           childOb.dep.depend()
-          if (Array.isArray(value)) {
+          if (Array.isArray(value)) {//这里如果 value 是个数组，那么就通过 dependArray 把数组每个元素也去做依赖收集。
             dependArray(value)
           }
         }
@@ -202,22 +203,23 @@ export function defineReactive (
  * triggers change notification if the property doesn't
  * already exist.
  */
+//set 方法接收 3个参数，target 可能是数组或者是普通对象，key 代表的是数组的下标或者是对象的键值，val 代表添加的值。
 export function set (target: Array<any> | Object, key: any, val: any): any {
   if (process.env.NODE_ENV !== 'production' &&
     (isUndef(target) || isPrimitive(target))
   ) {
     warn(`Cannot set reactive property on undefined, null, or primitive value: ${(target: any)}`)
   }
-  if (Array.isArray(target) && isValidArrayIndex(key)) {
+  if (Array.isArray(target) && isValidArrayIndex(key)) {//如果 target 是数组且 key 是一个合法的下标
     target.length = Math.max(target.length, key)
-    target.splice(key, 1, val)
+    target.splice(key, 1, val)//这里的 splice 其实已经不仅仅是原生数组的 splice 了
     return val
   }
-  if (key in target && !(key in Object.prototype)) {
-    target[key] = val
+  if (key in target && !(key in Object.prototype)) {//判断 key 是否已经存在于 target 中
+    target[key] = val//直接赋值返回，因为这样的变化是可以观测到了
     return val
   }
-  const ob = (target: any).__ob__
+  const ob = (target: any).__ob__//再获取到 target.__ob__ 并赋值给 ob，它是在 Observer 的构造函数执行的时候初始化的，表示 Observer 的一个实例
   if (target._isVue || (ob && ob.vmCount)) {
     process.env.NODE_ENV !== 'production' && warn(
       'Avoid adding reactive properties to a Vue instance or its root $data ' +
@@ -225,12 +227,12 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
     )
     return val
   }
-  if (!ob) {
+  if (!ob) {//如果它不存在，则说明 target 不是一个响应式的对象，则直接赋值并返回
     target[key] = val
     return val
   }
-  defineReactive(ob.value, key, val)
-  ob.dep.notify()
+  defineReactive(ob.value, key, val)//通过 defineReactive(ob.value, key, val) 把新添加的属性变成响应式对象，
+  ob.dep.notify()//通过 ob.dep.notify() 手动的触发依赖通知
   return val
 }
 
