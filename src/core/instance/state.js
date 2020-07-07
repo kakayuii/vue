@@ -173,21 +173,21 @@ const computedWatcherOptions = { lazy: true }
 
 function initComputed (vm: Component, computed: Object) {
   // $flow-disable-line
-  const watchers = vm._computedWatchers = Object.create(null)
+  const watchers = vm._computedWatchers = Object.create(null)//首先创建 vm._computedWatchers 为一个空对象
   // computed properties are just getters during SSR
   const isSSR = isServerRendering()
 
-  for (const key in computed) {
-    const userDef = computed[key]
-    const getter = typeof userDef === 'function' ? userDef : userDef.get
-    if (process.env.NODE_ENV !== 'production' && getter == null) {
+  for (const key in computed) {//对 computed 对象做遍历，这个 watcher 和渲染 watcher 有一点很大的不同，它是一个 computed watcher。因为 const computedWatcherOptions = { computed: true }。
+    const userDef = computed[key]//拿到计算属性的每一个 userDef
+    const getter = typeof userDef === 'function' ? userDef : userDef.get//尝试获取这个 userDef 对应的 getter 函数
+    if (process.env.NODE_ENV !== 'production' && getter == null) {//拿不到则在开发环境下报警告
       warn(
         `Getter is missing for computed property "${key}".`,
         vm
       )
     }
 
-    if (!isSSR) {
+    if (!isSSR) {//接下来为每一个 getter 创建一个 watcher
       // create internal watcher for the computed property.
       watchers[key] = new Watcher(
         vm,
@@ -200,9 +200,9 @@ function initComputed (vm: Component, computed: Object) {
     // component-defined computed properties are already defined on the
     // component prototype. We only need to define computed properties defined
     // at instantiation here.
-    if (!(key in vm)) {
+    if (!(key in vm)) {//判断如果 key 不是 vm 的属性
       defineComputed(vm, key, userDef)
-    } else if (process.env.NODE_ENV !== 'production') {
+    } else if (process.env.NODE_ENV !== 'production') {//否则判断计算属性对于的 key 是否已经被 data 或者 prop 所占用，如果是的话则在开发环境报相应的警告。
       if (key in vm.$data) {
         warn(`The computed property "${key}" is already defined in data.`, vm)
       } else if (vm.$options.props && key in vm.$options.props) {
@@ -240,11 +240,11 @@ export function defineComputed (
       )
     }
   }
-  Object.defineProperty(target, key, sharedPropertyDefinition)
+  Object.defineProperty(target, key, sharedPropertyDefinition)//利用 Object.defineProperty 给计算属性对应的 key 值添加 getter 和 setter，setter 通常是计算属性是一个对象，并且拥有 set 方法的时候才有，否则是一个空函数。在平时的开发场景中，计算属性有 setter 的情况比较少
 }
 
 function createComputedGetter (key) {
-  return function computedGetter () {
+  return function computedGetter () {////返回一个函数 computedGetter，它就是计算属性对应的 getter。
     const watcher = this._computedWatchers && this._computedWatchers[key]
     if (watcher) {
       if (watcher.dirty) {
