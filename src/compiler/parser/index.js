@@ -76,6 +76,7 @@ export function createASTElement (
 /**
  * Convert HTML string to AST.
  */
+//parse 函数的输入是 template 和 options，输出是 AST 的根节点。template 就是我们的模板字符串，而 options 实际上是和平台相关的一些配置
 export function parse (
   template: string,
   options: CompilerOptions
@@ -201,6 +202,7 @@ export function parse (
     }
   }
 
+  //整体来说它的逻辑就是循环解析 template ，用正则做各种匹配，对于不同情况分别进行不同的处理，直到整个 template 被解析完毕。 在匹配的过程中会利用 advance 函数不断前进整个模板字符串，直到字符串末尾。
   parseHTML(template, {
     warn,
     expectHTML: options.expectHTML,
