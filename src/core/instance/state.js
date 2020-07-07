@@ -244,7 +244,7 @@ export function defineComputed (
 }
 
 function createComputedGetter (key) {
-  return function computedGetter () {////返回一个函数 computedGetter，它就是计算属性对应的 getter。
+  return function computedGetter () {//返回一个函数 computedGetter，它就是计算属性对应的 getter。
     const watcher = this._computedWatchers && this._computedWatchers[key]
     if (watcher) {
       if (watcher.dirty) {
@@ -292,6 +292,7 @@ function initMethods (vm: Component, methods: Object) {
   }
 }
 
+//对 watch 对象做遍历，拿到每一个 handler，因为 Vue 是支持 watch 的同一个 key 对应多个 handler，所以如果 handler 是一个数组，则遍历这个数组，调用 createWatcher 方法，否则直接调用 createWatcher：
 function initWatch (vm: Component, watch: Object) {
   for (const key in watch) {
     const handler = watch[key]
@@ -304,7 +305,7 @@ function initWatch (vm: Component, watch: Object) {
     }
   }
 }
-
+//首先对 hanlder 的类型做判断，拿到它最终的回调函数，最后调用 vm.$watch(keyOrFn, handler, options) 函数
 function createWatcher (
   vm: Component,
   expOrFn: string | Function,
@@ -346,20 +347,20 @@ export function stateMixin (Vue: Class<Component>) {
 
   Vue.prototype.$set = set
   Vue.prototype.$delete = del
-
+//侦听属性 watch 最终会调用 $watch 方法
   Vue.prototype.$watch = function (
     expOrFn: string | Function,
     cb: any,
     options?: Object
   ): Function {
     const vm: Component = this
-    if (isPlainObject(cb)) {
+    if (isPlainObject(cb)) {//这个方法首先判断 cb 如果是一个对象，则调用 createWatcher 方法，这是因为 $watch 方法是用户可以直接调用的，它可以传递一个对象，也可以传递函数
       return createWatcher(vm, expOrFn, cb, options)
     }
     options = options || {}
-    options.user = true
-    const watcher = new Watcher(vm, expOrFn, cb, options)
-    if (options.immediate) {
+    options.user = true//这里需要注意一点这是一个 user watcher，因为 options.user = true
+    const watcher = new Watcher(vm, expOrFn, cb, options)//实例化了一个 watcher，通过实例化 watcher 的方式，一旦我们 watch 的数据发送变化，它最终会执行 watcher 的 run 方法
+    if (options.immediate) {//如果我们设置了 immediate 为 true，则直接会执行回调函数 cb
       try {
         cb.call(vm, watcher.value)
       } catch (error) {
@@ -367,7 +368,7 @@ export function stateMixin (Vue: Class<Component>) {
       }
     }
     return function unwatchFn () {
-      watcher.teardown()
+      watcher.teardown()//用 teardown 方法去移除这个 watcher
     }
   }
 }
