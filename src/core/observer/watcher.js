@@ -1,5 +1,5 @@
 /* @flow */
-
+//Watcher 和 Dep 就是一个非常经典的观察者设计模式的实现
 import {
   warn,
   remove,
@@ -69,8 +69,8 @@ export default class Watcher {
     this.id = ++uid // uid for batching
     this.active = true
     this.dirty = this.lazy // for lazy watchers
-    this.deps = []//this.deps 和 this.newDeps 表示 Watcher 实例持有的 Dep 实例的数组；
-    this.newDeps = []
+    this.deps = []//表示上一次添加的 Dep 实例数组  //this.deps 和 this.newDeps 表示 Watcher 实例持有的 Dep 实例的数组；
+    this.newDeps = []//表示新添加的 Dep 实例数组
     this.depIds = new Set()//而 this.depIds 和 this.newDepIds 分别代表 this.deps 和 this.newDeps 的 id Set
     this.newDepIds = new Set()
     this.expression = process.env.NODE_ENV !== 'production'
@@ -121,7 +121,7 @@ export default class Watcher {
         traverse(value)
       }
       popTarget()
-      this.cleanupDeps()
+      this.cleanupDeps()//依赖清空
     }
     return value
   }
@@ -148,15 +148,18 @@ export default class Watcher {
    */
   cleanupDeps () {
     let i = this.deps.length
+   //遍历 deps
     while (i--) {
       const dep = this.deps[i]
       if (!this.newDepIds.has(dep.id)) {
-        dep.removeSub(this)
+        dep.removeSub(this)//移除对 dep.subs 数组中 Wathcer 的订阅
       }
     }
+    //把 newDepIds 和 depIds 交换
     let tmp = this.depIds
     this.depIds = this.newDepIds
     this.newDepIds = tmp
+    //把 newDepIds 和 newDeps 清空。
     this.newDepIds.clear()
     tmp = this.deps
     this.deps = this.newDeps
