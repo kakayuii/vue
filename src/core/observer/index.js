@@ -34,6 +34,7 @@ export function toggleObserving (value: boolean) {
  * object's property keys into getter/setters that
  * collect dependencies and dispatch updates.
  */
+//observe 方法的作用就是给非 VNode 的对象类型数据添加一个 Observer，如果已经添加过则直接返回，否则在满足一定条件下去实例化一个 Observer 对象实例
 export class Observer {
   value: any;
   dep: Dep;
@@ -41,10 +42,10 @@ export class Observer {
 
   constructor (value: any) {
     this.value = value
-    this.dep = new Dep()
+    this.dep = new Dep()//实例化 Dep 对象
     this.vmCount = 0
-    def(value, '__ob__', this)
-    if (Array.isArray(value)) {
+    def(value, '__ob__', this)//通过执行 def 函数把自身实例添加到数据对象 value 的 __ob__ 属性上
+    if (Array.isArray(value)) {//对 value 做判断，对于数组会调用 observeArray 方法，否则对纯对象调用 walk 方法
       if (hasProto) {
         protoAugment(value, arrayMethods)
       } else {
@@ -61,6 +62,7 @@ export class Observer {
    * getter/setters. This method should only be called when
    * value type is Object.
    */
+  //walk 方法是遍历对象的 key 调用 defineReactive 方法
   walk (obj: Object) {
     const keys = Object.keys(obj)
     for (let i = 0; i < keys.length; i++) {
@@ -71,6 +73,7 @@ export class Observer {
   /**
    * Observe a list of Array items.
    */
+  //遍历数组再次调用 observe 方法
   observeArray (items: Array<any>) {
     for (let i = 0, l = items.length; i < l; i++) {
       observe(items[i])
@@ -132,6 +135,7 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
 /**
  * Define a reactive property on an Object.
  */
+//defineReactive 的功能就是定义一个响应式对象，给对象动态添加 getter 和 setter
 export function defineReactive (
   obj: Object,
   key: string,
@@ -139,9 +143,9 @@ export function defineReactive (
   customSetter?: ?Function,
   shallow?: boolean
 ) {
-  const dep = new Dep()
+  const dep = new Dep()//始化 Dep 对象的实例
 
-  const property = Object.getOwnPropertyDescriptor(obj, key)
+  const property = Object.getOwnPropertyDescriptor(obj, key)//拿到 obj 的属性描述符
   if (property && property.configurable === false) {
     return
   }
@@ -153,14 +157,14 @@ export function defineReactive (
     val = obj[key]
   }
 
-  let childOb = !shallow && observe(val)
-  Object.defineProperty(obj, key, {
+  let childOb = !shallow && observe(val)//对子对象递归调用 observe 方法，这样就保证了无论 obj 的结构多复杂，它的所有子属性也能变成响应式的对象，这样我们访问或修改 obj 中一个嵌套较深的属性，也能触发 getter 和 setter。 
+  Object.defineProperty(obj, key, {//最后利用 Object.defineProperty 去给 obj 的属性 key 添加 getter 和 setter
     enumerable: true,
     configurable: true,
     get: function reactiveGetter () {
       const value = getter ? getter.call(obj) : val
       if (Dep.target) {
-        dep.depend()
+        dep.depend()//在 get 函数中通过 dep.depend 做依赖收集
         if (childOb) {
           childOb.dep.depend()
           if (Array.isArray(value)) {
