@@ -46,6 +46,7 @@ export default class Dep {
       // order
       subs.sort((a, b) => a.id - b.id)
     }
+    ////遍历所有的 subs，也就是 Watcher 的实例数组，然后调用每一个 watcher 的 update 方法，
     for (let i = 0, l = subs.length; i < l; i++) {
       subs[i].update()
     }
