@@ -4,6 +4,7 @@ import { extend } from 'shared/util'
 import { detectErrors } from './error-detector'
 import { createCompileToFunctionFn } from './to-function'
 
+//它接收一个 baseOptions 的参数，
 export function createCompilerCreator (baseCompile: Function): Function {
   return function createCompiler (baseOptions: CompilerOptions) {
     function compile (
@@ -67,7 +68,7 @@ export function createCompilerCreator (baseCompile: Function): Function {
       return compiled
     }
 
-    return {
+    return {//返回的是一个对象，包括 compile 方法属性和 compileToFunctions 属性，这个 compileToFunctions 对应的就是 $mount 函数调用的 compileToFunctions 方法，它是调用 createCompileToFunctionFn 方法的返回值
       compile,
       compileToFunctions: createCompileToFunctionFn(compile)
     }
