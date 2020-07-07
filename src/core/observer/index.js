@@ -191,8 +191,8 @@ export function defineReactive (
       } else {
         val = newVal
       }
-      childOb = !shallow && observe(newVal)
-      dep.notify()
+      childOb = !shallow && observe(newVal)//如果 shallow 为 false 的情况，会对新设置的值变成一个响应式对象
+      dep.notify()//通知所有的订阅者
     }
   })
 }
