@@ -23,6 +23,7 @@ let uid = 0
  * and fires callback when the expression value changes.
  * This is used for both the $watch() api and directives.
  */
+//Watcher 是一个 Class，在它的构造函数中，定义了一些和 Dep 相关的属性
 export default class Watcher {
   vm: Component;
   expression: string;
@@ -68,9 +69,9 @@ export default class Watcher {
     this.id = ++uid // uid for batching
     this.active = true
     this.dirty = this.lazy // for lazy watchers
-    this.deps = []
+    this.deps = []//this.deps 和 this.newDeps 表示 Watcher 实例持有的 Dep 实例的数组；
     this.newDeps = []
-    this.depIds = new Set()
+    this.depIds = new Set()//而 this.depIds 和 this.newDepIds 分别代表 this.deps 和 this.newDeps 的 id Set
     this.newDepIds = new Set()
     this.expression = process.env.NODE_ENV !== 'production'
       ? expOrFn.toString()
@@ -98,6 +99,7 @@ export default class Watcher {
   /**
    * Evaluate the getter, and re-collect dependencies.
    */
+  //当我们去实例化一个渲染 watcher 的时候，首先进入 watcher 的构造函数逻辑，然后会执行它的 this.get() 方法
   get () {
     pushTarget(this)
     let value
