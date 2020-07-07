@@ -63,6 +63,7 @@ export function pushTarget (target: ?Watcher) {
   Dep.target = target//把 Dep.target 赋值为当前的渲染 watcher 并压栈（为了恢复用）
 }
 
+//把 Dep.target 恢复成上一个状态，因为当前 vm 的数据依赖收集已经完成，那么对应的渲染Dep.target 也需要改变
 export function popTarget () {
   targetStack.pop()
   Dep.target = targetStack[targetStack.length - 1]
