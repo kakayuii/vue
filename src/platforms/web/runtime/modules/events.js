@@ -101,15 +101,14 @@ function remove (
     capture
   )
 }
-
 function updateDOMListeners (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   if (isUndef(oldVnode.data.on) && isUndef(vnode.data.on)) {
     return
   }
-  const on = vnode.data.on || {}
+  const on = vnode.data.on || {}//首先获取 vnode.data.on，这就是我们之前的生成的 data 中对应的事件对象
   const oldOn = oldVnode.data.on || {}
-  target = vnode.elm
-  normalizeEvents(on)
+  target = vnode.elm//target 是当前 vnode 对于的 DOM 对象
+  normalizeEvents(on)//normalizeEvents 主要是对 v-model 相关的处理
   updateListeners(on, oldOn, add, remove, createOnceHandler, vnode.context)
   target = undefined
 }
