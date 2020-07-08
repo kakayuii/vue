@@ -309,17 +309,17 @@ export function genData (el: ASTElement, state: CodegenState): string {
   }
   return data
 }
-
+//首先是 parse 阶段， 例如v-model 被当做普通的指令解析到 el.directives 中，然后在 codegen 阶段，执行 genData 的时候，会执行 const dirs = genDirectives(el, state)
 function genDirectives (el: ASTElement, state: CodegenState): string | void {
   const dirs = el.directives
   if (!dirs) return
   let res = 'directives:['
   let hasRuntime = false
   let i, l, dir, needRuntime
-  for (i = 0, l = dirs.length; i < l; i++) {
+  for (i = 0, l = dirs.length; i < l; i++) {//遍历 el.directives
     dir = dirs[i]
     needRuntime = true
-    const gen: DirectiveFunction = state.directives[dir.name]
+    const gen: DirectiveFunction = state.directives[dir.name]//获取每一个指令对应的方法，这个指令方法实际上是在实例化 CodegenState 的时候通过 option 传入的，这个 option 就是编译相关的配置，它在不同的平台下配置不同
     if (gen) {
       // compile-time directive that manipulates AST.
       // returns true if it also needs a runtime counterpart.
