@@ -463,7 +463,7 @@ function genScopedSlot (
   const reverseProxy = slotScope ? `` : `,proxy:true`
   return `{key:${el.slotTarget || `"default"`},fn:${fn}${reverseProxy}}`
 }
-
+//遍历 children，然后执行 genNode 方法，
 export function genChildren (
   el: ASTElement,
   state: CodegenState,
@@ -526,6 +526,7 @@ function needsNormalization (el: ASTElement): boolean {
   return el.for !== undefined || el.tag === 'template' || el.tag === 'slot'
 }
 
+//根据不同的 type 执行具体的方法
 function genNode (node: ASTNode, state: CodegenState): string {
   if (node.type === 1) {
     return genElement(node, state)
