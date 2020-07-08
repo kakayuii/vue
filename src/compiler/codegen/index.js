@@ -25,7 +25,7 @@ export class CodegenState {
     this.options = options
     this.warn = options.warn || baseWarn
     this.transforms = pluckModuleFunction(options.modules, 'transformCode')
-    this.dataGenFns = pluckModuleFunction(options.modules, 'genData')
+    this.dataGenFns = pluckModuleFunction(options.modules, 'genData')//获取所有 modules 中的 genData 函数
     this.directives = extend(extend({}, baseDirectives), options.directives)
     const isReservedTag = options.isReservedTag || no
     this.maybeComponent = (el: ASTElement) => !!el.component || !isReservedTag(el.tag)
@@ -44,14 +44,15 @@ export function generate (
   ast: ASTElement | void,
   options: CompilerOptions
 ): CodegenResult {
-  const state = new CodegenState(options)
-  const code = ast ? genElement(ast, state) : '_c("div")'
+  const state = new CodegenState(options)//这里的 state 是 CodegenState 的一个实例
+  const code = ast ? genElement(ast, state) : '_c("div")'//通过 genElement(ast, state) 生成 code
   return {
-    render: `with(this){return ${code}}`,
+    render: `with(this){return ${code}}`,//把 code 用 with(this){return ${code}}} 包裹起来
     staticRenderFns: state.staticRenderFns
   }
 }
 
+//基本就是判断当前 AST 元素节点的属性执行不同的代码生成函数 v-if v-once v-for
 export function genElement (el: ASTElement, state: CodegenState): string {
   if (el.parent) {
     el.pre = el.pre || el.parent.pre
@@ -142,6 +143,7 @@ function genOnce (el: ASTElement, state: CodegenState): string {
   }
 }
 
+//genIf 主要是通过执行 genIfConditions
 export function genIf (
   el: any,
   state: CodegenState,
@@ -162,12 +164,13 @@ function genIfConditions (
     return altEmpty || '_e()'
   }
 
-  const condition = conditions.shift()
+  const condition = conditions.shift()//依次从 conditions 获取第一个 condition
   if (condition.exp) {
+    //对 condition.exp 去生成一段三元运算符的代码
     return `(${condition.exp})?${
       genTernaryExp(condition.block)
     }:${
-      genIfConditions(conditions, state, altGen, altEmpty)
+      genIfConditions(conditions, state, altGen, altEmpty)//递归调用 genIfConditions，这样如果有多个 conditions（条件），就生成多层三元运算逻辑
     }`
   } else {
     return `${genTernaryExp(condition.block)}`
@@ -182,7 +185,7 @@ function genIfConditions (
         : genElement(el, state)
   }
 }
-
+//首先 AST 元素节点中获取了和 for 相关的一些属性，然后返回了一个代码字符串。
 export function genFor (
   el: any,
   state: CodegenState,
@@ -216,6 +219,7 @@ export function genFor (
     '})'
 }
 
+//根据 AST 元素节点的属性构造出一个 data 对象字符串
 export function genData (el: ASTElement, state: CodegenState): string {
   let data = '{'
 
