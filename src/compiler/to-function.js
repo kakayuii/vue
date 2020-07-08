@@ -9,6 +9,7 @@ type CompiledFunctionResult = {
   staticRenderFns: Array<Function>;
 };
 
+//实际上就是把 render 代码串通过 new Function 的方式转换成可执行的函数，赋值给 vm.options.render，这样当组件通过 vm._render 的时候，就会执行这个 render 函数。
 function createFunction (code, errors) {
   try {
     return new Function(code)
