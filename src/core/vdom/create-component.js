@@ -97,7 +97,6 @@ const componentVNodeHooks = {
 }
 
 const hooksToMerge = Object.keys(componentVNodeHooks)
-
 export function createComponent (
   Ctor: Class<Component> | Function | Object | void,
   data: ?VNodeData,
@@ -165,10 +164,10 @@ export function createComponent (
 
   // extract listeners, since these needs to be treated as
   // child component listeners instead of DOM listeners
-  const listeners = data.on
+  const listeners = data.on//把 data.on 赋值给了 listeners
   // replace with listeners with .native modifier
   // so it gets processed during parent component patch.
-  data.on = data.nativeOn
+  data.on = data.nativeOn//把 data.nativeOn 赋值给了 data.on，这样所有的原生 DOM 事件是在当前组件环境中处理的
 
   if (isTrue(Ctor.options.abstract)) {
     // abstract components do not keep anything
@@ -186,6 +185,7 @@ export function createComponent (
   installComponentHooks(data)
 
   // return a placeholder vnode
+//而对于自定义事件，我们把 listeners 作为 vnode 的 componentOptions 传入，它是在子组件初始化阶段中处理的，所以它的处理环境是子组件
   const name = Ctor.options.name || tag
   const vnode = new VNode(
     `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`,
